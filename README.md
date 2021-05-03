@@ -47,6 +47,37 @@ Furthermore, termcontrol's own modification behaviour can be controlled by this,
 Example use case: The app offers a refresh hot key for the user and can spawn subprocesses. With termcontrol, such
 a subprocess can trigger the refresh hotkey on its parent process once done, so the user sees the update automatically, when produced.
 
+## Environment Variable
+
+When a process is run within termcontrol, it sees `$TERMCONTROL_IO_DIR`, pointing to the directory of in/out fifos.
+
+## Modes
+
+Currently there are two modes:
+
+- Insert (pass through) mode: Inner program sees the input stream as you type it (or as it is written to the 'in' fifo, here except byte sequences which control termcontrol itself).
+- Command mode: Translating user input as configured.
+
+> Run `termcontrol -h` to see supported modifications.
+
+While there are NO translations configured, then termcontrol will not listen and enforce mode switching commands. 
+
+
+## Nesting
+
+Whenever any translation of command mode input is configured, then termcontrol will listen for mode switching actions,
+i.e. "go to insert mode", "go back to command mode".
+
+If you start a termcontrolled process within another, those would collide. Policies then are:
+
+At startup, when `$TERMCONTROL_IO_DIR` is already set, then
+
+1. An exception is raised if the inner process will be started on the same IO directory.
+1. When it is started on another, then the outer termcontrol process will be paused and resumed at inner process exit,
+   regarding listening to control sequences. To achieve that, the inner process sends control sequences to the outer
+   termcontrol 'in' fifo, causing it to suspend and resume.
+1. The outer process will still listen to and feed its in/out fifos and also keep logging, if it is configured to do so.
+
 
 ## Performance
 
