@@ -12,4 +12,5 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 script: 
-  - xterm -e tests/within_xterm.sh
+  - xterm -e tests/travis_tests_within_xterm.sh
+  - ls -lta success
