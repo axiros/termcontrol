@@ -30,6 +30,7 @@ int cmd_add_ctl = 0;
 int cmd_add_alt = 0;
 int cmd_add_128 = 0;
 int cmd_to_upper = 0;
+int key_insert_mode = 105; //i
 int listen_jk = 0;
 char *home_dir;
 
@@ -97,7 +98,7 @@ void set_and_signal_cmd_mode(int cmdfd) {
     write2(cmdfd, buf, 2);
 }
 
-void write_log(int count, char* buf) {
+void write_log(int log_type, int count, char* buf) {
     char *filename = "/termcontrol_input.log";
     char *filepath = malloc(strlen(home_dir) + strlen(filename) + 1);
     FILE * fp; // debug log
@@ -105,7 +106,7 @@ void write_log(int count, char* buf) {
     strncpy(filepath, home_dir, strlen(home_dir) + 1);
     strncat(filepath, filename, strlen(filename) + 1);
     fp = fopen(filepath,  "a+");
-    fprintf(fp, "MUCA8: %d%d%d%d%d. ", cmd_mode, cmd_to_upper, cmd_add_ctl, cmd_add_alt, cmd_add_128);
+    fprintf(fp, "MUCA8[%d]: %d%d%d%d%d. ", log_type, cmd_mode, cmd_to_upper, cmd_add_ctl, cmd_add_alt, cmd_add_128);
     for (int i=0; i<count; i++) {
         key = buf[i];
         if (key < 0) key += 256; // we want to see 0-256
@@ -131,7 +132,7 @@ void handle_cmd_mode(int cmdfd, int count, char *buf) {
         }
         if (key > 31 && key < 128) {
             // i -> switch to insert mode:
-            if (key == 105) cmd_mode=0;
+            if (key == key_insert_mode) cmd_mode=0;
 
             if (cmd_to_upper == 1) {
                 // a-z? all LETTERS to upper case:
@@ -153,7 +154,7 @@ void handle_cmd_mode(int cmdfd, int count, char *buf) {
             }
         }
     }
-    if (log_conv > 0) write_log(count+p, cmdbuf);
+    if (log_conv > 0) write_log(1, count+p, cmdbuf);
     write2(cmdfd, cmdbuf, count + p);
 }
 
@@ -217,16 +218,17 @@ void handle_fifo_in_mode(int cmdfd, int count, char *buf) {
                 case 237: cmd_add_128  = 0; break;
                 case 238: cmd_add_128  = 1; break;
                 case 239: cmd_mode     = 0; break;
-                case 240: set_and_signal_cmd_mode(cmdfd); break;
+                case 240: cmd_mode     = 1; break; // silent setting, e.g. before signal consuming app starts
+                case 241: set_and_signal_cmd_mode(cmdfd); break;
                           // pause
-                case 241: {   
+                case 242: {   
                               cmd_mode_before_pause=cmd_mode; 
                               cmd_mode = 0;
                               listen_jk = 0;
                               break;
                           }
                           // resume:
-                case 242: cmd_mode = cmd_mode_before_pause; break;
+                case 243: cmd_mode = cmd_mode_before_pause; break;
                 default: {
                              receiving_cmd = 0; 
                              p -= 1; 
@@ -238,7 +240,7 @@ void handle_fifo_in_mode(int cmdfd, int count, char *buf) {
         }
     }
 
-    //write_log(i-p, appbuf);
+    //write_log(3, i-p, appbuf);
     write2(cmdfd, appbuf, i-p);
 }
 
@@ -257,7 +259,7 @@ int handle(struct epoll_event* e, int cmdfd, int in_fd, int out_fd) {
 
         if (e->data.fd == STDIN_FILENO) {
             if (count > 0) {
-                if (log_mode) write_log(count, buf);
+                if (log_mode) write_log(0, count, buf);
 
                 if (cmd_mode == 1) handle_cmd_mode(cmdfd, count, buf);
                 else               handle_ins_mode(cmdfd, count, buf);
@@ -423,19 +425,20 @@ int main(int argc, char** argv) {
     }
 
     if (argc < 3) {
-        fprintf(stderr, "Usage: hijack [--cmd] [--cms <int>] [--ctl] [--alt] [--upc] [-128] [--log] [--lgp] <dir> <cmd ...>\n");
+        fprintf(stderr, "\nUSAGE: hijack [SWITCHES] <dir> <cmd ...>\n");
         fprintf(stderr, "\nPurpose: \n");
         fprintf(stderr, "  - Hijackes tty stdin and stdout of the given cmd and makes their fds accessible via fifos in given directory.\n");
         fprintf(stderr, "  - Allows modifications of stdin in 'command mode', entered via jk, exitted via i by default.\n");
         fprintf(stderr, "\nSwitches: \n");
-        fprintf(stderr, "  --cmd: set to command mode already at start (else via jk)\n"     );
-        fprintf(stderr, "  --cms: sig to send to app (as alt seq) when switching to command mode. 0 to send nothing (default). Ex: --cms 97 sends alt-a\n");
-        fprintf(stderr, "  --ctl: in cmd mode, prefix any LETTER key with control key\n");
-        fprintf(stderr, "  --alt: in cmd mode, prefix ANY key with alt key\n");
-        fprintf(stderr, "  --upc: in cmd mode, uppercase any LETTER key\n"   );
-        fprintf(stderr, "  --128: in cmd mode, add 128 to any key\n"         );
-        fprintf(stderr, "  --log: log keys as typed into $HOME/termcontrol_input.log \n");
-        fprintf(stderr, "  --lgc: log keys as converted in cmd mode into $HOME/termcontrol_input.log \n");
+        fprintf(stderr, "  --cmd: set to command mode already at start (else via jk) [false]\n"     );
+        fprintf(stderr, "  --cms <KEYCODE>: sig to send to app (as alt seq) when switching to command mode. 0 to send nothing. Ex: --cms 97 sends alt-a. [0]\n");
+        fprintf(stderr, "  --ins <KEYCODE>: which key to enter for insert mode. Ex: --ins 63 for '?' [105] 'i']\n");
+        fprintf(stderr, "  --ctl: in cmd mode, prefix any LETTER key with control key [false]\n");
+        fprintf(stderr, "  --alt: in cmd mode, prefix ANY key with alt key [false]\n");
+        fprintf(stderr, "  --upc: in cmd mode, uppercase any LETTER key [false]\n"   );
+        fprintf(stderr, "  --128: in cmd mode, add 128 to any key [false]\n"         );
+        fprintf(stderr, "  --log: log keys as typed into $HOME/termcontrol_input.log [false]\n");
+        fprintf(stderr, "  --lgc: log keys as converted in cmd mode into $HOME/termcontrol_input.log [false]\n");
         fprintf(stderr, "\nPositional: \n");
         fprintf(stderr, "  dir: directory containing IO fifos. Those will persist after exit.\n");
         fprintf(stderr, "  cmd: program to run, with args\n");
@@ -459,6 +462,12 @@ int main(int argc, char** argv) {
         argc = shift(argc, argv);
         argc = shift(argc, argv);
     }
+    if (!strcmp("--ins", argv[1])) {
+        key_insert_mode = strtol(argv[2], &argv[2], 10); 
+        argc = shift(argc, argv);
+        argc = shift(argc, argv);
+    }
+
     if (!strcmp("--ctl", argv[1])) {
         cmd_add_ctl = 1;
         argc = shift(argc, argv);

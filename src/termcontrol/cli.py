@@ -44,6 +44,13 @@ def main(args=None):
         help='Send an alt+<this code> to the app, so that it knows you switched to command mode. Eg. -S 97 => send alt+a',
     )
     parser.add_argument(
+        '-I',
+        '--insert-mode',
+        dest='ins_mode',
+        default='i',
+        help='Which key for insert mode (code or char)',
+    )
+    parser.add_argument(
         '-c',
         '--cmd-ctl',
         action='store_true',
@@ -75,7 +82,7 @@ def main(args=None):
         '-l',
         '--log',
         action='store_true',
-        dest='logging',
+        dest='log',
         help='Log stdin keys as typed by user numerically to $HOME/termcontrol_input.log',
     )
     parser.add_argument(
@@ -122,7 +129,7 @@ def main(args=None):
     if p.command == '':
         p.command = '/bin/sh'
 
-    cmd = termcontrol.tc_cmd(cli=p, get=p.get_cmd)
+    cmd = termcontrol.tc_run(cli=p, get=p.get_cmd)
     if p.get_cmd:
         return cmd
 
