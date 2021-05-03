@@ -16,30 +16,49 @@ export MD_LINKS_FOR=github
 set -x
 here="$(unset CDPATH && cd "$(dirname "${BASH_SOURCE[0]}")" && echo "$PWD")"
 cd "$here" || exit 1
-#export NOLINKREPL=true
-pytest -xs tests || exit 1
-git commit --amend -am 'pre upload'
-#unset NOLINKREPL
-#git commit -am 'pre_pypi_upload' # to have the commit hash for the links
-#slt="https://github.com/axiros/DevApps/blob/`git rev-parse  HEAD`"
-#slt="$slt/%(file)s%(#Lline)s"
-#echo "Setting links..."
-#mdtool set_links src_link_tmpl="github" md_file="README.md"
-git push || exit 1
 
-clean () {
-    rm -rf ./dist
-    rm -rf ./pytest2md.egg-info
-    rm -rf ./build
+function test {
+    #export NOLINKREPL=true
+    pytest -xs tests || exit 1
 }
-clean
-python setup.py clean sdist bdist_wheel
-twine upload ./dist/*
-clean
+function push {
+    git commit --amend -am 'pre upload'
+    #unset NOLINKREPL
+    #git commit -am 'pre_pypi_upload' # to have the commit hash for the links
+    #slt="https://github.com/axiros/DevApps/blob/`git rev-parse  HEAD`"
+    #slt="$slt/%(file)s%(#Lline)s"
+    #echo "Setting links..."
+    #mdtool set_links src_link_tmpl="github" md_file="README.md"
+    git push || exit 1
+}
 
+function pip {
+    clean () {
+        rm -rf ./dist
+        rm -rf ./pytest2md.egg-info
+        rm -rf ./build
+    }
+    clean
+    python setup.py clean sdist bdist_wheel
+    twine upload ./dist/*
+    clean
+}
 
+function main {
+    test -z "$1" && {
+        test
+        push
+        pip
+        exit $?
+    }
+    while [-n "$1"]; do
+        "$1"
+        shift
+    done
 
+}
 
+main "$@"
 
 
 
