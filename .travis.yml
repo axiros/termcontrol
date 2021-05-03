@@ -3,11 +3,12 @@ language: python
 dist: trusty
 
 install:
-  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash xfonts-base xterm
+  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pip python-pytest xdotool bash xfonts-base xterm
 
 # Start virtual X server, from https://docs.travis-ci.com/user/gui-and-headless-browsers/
 before_script:
   - "export DISPLAY=:99.0"
+  - pip install -e .
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 
