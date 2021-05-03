@@ -3,7 +3,7 @@ language: python
 dist: trusty
 
 install:
-  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash
+  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash xterm
 
 # Start virtual X server, from https://docs.travis-ci.com/user/gui-and-headless-browsers/
 before_script:
@@ -12,4 +12,4 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 script: 
-  - pytest -xs tests 
+  - xterm -e tests/within_xterm.sh
