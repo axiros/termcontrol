@@ -13,6 +13,5 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 script: 
-  - xterm -l -e tests/travis_tests_within_xterm.sh
-  - cat Xterm.log*
+  - tests/travis_tests_within_xterm.sh start
   - ls -lta success
