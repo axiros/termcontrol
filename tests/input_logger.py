@@ -18,6 +18,8 @@ if args:
     i = i.replace('"', '').replace("'", '')  # this is testmode. dirs are sane
     args_kw = cli.main(i.split(' '))
     args_kw.pop('get_cmd')
+    args_kw.pop('args', 0)
+    args_kw.pop('command', 0)
     args_kw.pop('full_command')
 
     # we feed the params into our python api:
