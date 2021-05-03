@@ -11,7 +11,7 @@ version: 2021.05.02
 
 ## Terminal Command Mode Support & I/O Multiplexing
 
-The tool is a slightly extended terminal I/O stream hijacker, based on [https://github.com/j3parker/hijack.git](https://github.com/j3parker/hijack.git]).
+The tool is a slightly extended Linux terminal I/O stream hijacker, based on [https://github.com/j3parker/hijack.git](https://github.com/j3parker/hijack.git]).
 
 Instead of "simply" forwarding stdin into the application, it allows to *modify* it, dynamically, before it hits the app. Stdout remains untouched, i.e. keeps as produced by the application.
 
@@ -123,9 +123,56 @@ which means all lower case letters are converted to upper case ones already from
 
 ## Installation
 
-`pip install termcontrol`
+`pip install termcontrol` - we bundled the compiled hijack.c for intel 64 bit Linux:
+
+<details><summary>Pip Installation Sequence...</summary>
+```bash
+~ ❯❯❯ termcontrol                                                             (jupyter)
+fish: Unknown command: termcontrol
+~ ❯❯❯ pip install termcontrol                                                 (jupyter)
+Collecting termcontrol
+  Downloading termcontrol-2021.5.2-py3-none-any.whl (31 kB)
+Installing collected packages: termcontrol
+Successfully installed termcontrol-2021.5.2
+~ ❯❯❯ termcontrol --cmd-upper /bin/bash                                       (jupyter)
+                    /-
+                   ooo:
+                  yoooo/
+                 yooooooo
+                yooooooooo                  gk@gkarco
+               yooooooooooo                 ---------
+             .yooooooooooooo                OS: ArcoLinux
+            .oooooooooooooooo               Kernel: 5.10.32-1-lts
+                  (...)
+                  (...)
+   :ooooooooo      .-ooooooooooooooooo.     CPU: Intel i7-8565U (8) @ 4.600GHz
+  ooooooooo-             -ooooooooooooo.    GPU: Intel UHD Graphics 620
+ ooooooooo-                 .-oooooooooo.   Memory: 8166MiB / 15351MiB (53%)
+ooooooooo.                     -ooooooooo
 
 
 
 
+
+/home/gk/repos/termcontrol$ # now typing "abcjkabciabc" (jk exits insert mode, i switches basck):
+/home/gk/repos/termcontrol$ abcABCIabc  # that's what the app (bash) sees
+exit
+~ ❯❯❯
+
+```
+</details>
+
+On other architectures you may need to compile `hijack.c`, using the Makefile within the package directory.
+
+### OSX?
+
+Possible - but not done.
+
+Rough outline:
+
+1. `hijack.c`'s `pty.h` include has to be changed to `util.h` (easy)
+1. `epoll.h` has to be changed to `uv.h` (harder), since epoll is Linux Kernel only =>
+    - `brew install libuv`
+    - `-I/usr/local/include` into the Makefile and then
+    - replace the epoll structures to uv ones within [hijack.c](./src/termcontrol/hijack.c)...
 
