@@ -1,7 +1,7 @@
 ---
 
 author: gk
-version: 2021.05.01
+version: 2021.05.02
 
 ---
 
@@ -62,7 +62,7 @@ convenient).
 
 This is an application which uses fzf from a python process, to let the user select and filter lists.
 
-![](./docs/recorded.gif)
+![](https://raw.githubusercontent.com/axiros/termcontrol/main/docs/recorded.gif)
 
 - It uses termcontrol's python API in its main method, in order to get restarted within termcontrol like this:
 

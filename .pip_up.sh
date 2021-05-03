@@ -17,12 +17,14 @@ set -x
 here="$(unset CDPATH && cd "$(dirname "${BASH_SOURCE[0]}")" && echo "$PWD")"
 cd "$here" || exit 1
 
-function test {
+function py_test {
     #export NOLINKREPL=true
+    return
     pytest -xs tests || exit 1
 }
+
 function push {
-    git commit --amend -am 'pre upload'
+    git commit --amend -am 'ci: pre upload'
     #unset NOLINKREPL
     #git commit -am 'pre_pypi_upload' # to have the commit hash for the links
     #slt="https://github.com/axiros/DevApps/blob/`git rev-parse  HEAD`"
@@ -45,13 +47,14 @@ function pip {
 }
 
 function main {
+    set -x
     test -z "$1" && {
-        test
+        py_test
         push
         pip
         exit $?
     }
-    while [-n "$1"]; do
+    while [[ -n "$1" ]]; do
         "$1"
         shift
     done

@@ -61,7 +61,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 5 - Beta',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Operating System :: POSIX',
         'License :: OSI Approved :: BSD License',
@@ -76,7 +76,7 @@ setup(
         'Environment :: Console',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: C :: 3',
+        'Programming Language :: C',
     ],
     keywords=['fzf', 'terminal', 'tty', 'pty', 'IO', 'hijack'],
     py_modules=['termcontrol'],
