@@ -10,11 +10,12 @@ function main {
         echo $$ > testpid
         xterm -l -e "$0" &
         sleep 1
+        tail -f /home/gk/termcontrol_input.log &
         tail -f Xterm.log*
         exit 0
     }
     
-    pytest -xs . && touch "$d/success"
+    pytest -xs tests/test_cli -k works && touch "$d/success"
     kill $(cat "$d/testpid") 
 
 }
