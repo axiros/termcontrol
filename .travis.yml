@@ -1,10 +1,9 @@
 sudo: require
-language: cpp
-compiler: gcc
+language: python
 dist: trusty
 
 install:
-  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev
+  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash
 
 # Start virtual X server, from https://docs.travis-ci.com/user/gui-and-headless-browsers/
 before_script:
@@ -13,6 +12,4 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 script: 
-  - make
-  - sudo make install
-  - sudo make uninstall
+  - pytest -xs tests 
