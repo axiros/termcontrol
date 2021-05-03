@@ -5,7 +5,6 @@ version: 2021.05.02
 
 ---
 
-
 # termcontrol
 
 [![pypi version](https://img.shields.io/pypi/v/termcontrol.svg)](https://pypi.org/project/termcontrol/)
@@ -14,7 +13,7 @@ version: 2021.05.02
 
 The tool is a slightly extended terminal I/O stream hijacker, based on [https://github.com/j3parker/hijack.git](https://github.com/j3parker/hijack.git]).
 
-But, instead of just forwarding stdin into the application, it allows to *modify* it, dynamically, before it hits the app. Stdout remains untouched, i.e. keeps as produced by the application.
+Instead of "simply" forwarding stdin into the application, it allows to *modify* it, dynamically, before it hits the app. Stdout remains untouched, i.e. keeps as produced by the application.
 
 Termcontrol also features a Python convenience wrapper.
 
