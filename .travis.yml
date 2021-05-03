@@ -3,7 +3,7 @@ language: python
 dist: trusty
 
 install:
-  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash xterm
+  - sudo apt-get install libx11-dev libxtst-dev libxinerama-dev libxkbcommon-dev python-pytest xdotool bash xfonts-base xterm
 
 # Start virtual X server, from https://docs.travis-ci.com/user/gui-and-headless-browsers/
 before_script:

@@ -54,6 +54,7 @@ def test_cmd_upper_switching_on_and_off(wait=0):
     v2 = 'a' * l + 'A' * l + 'I' + 'a' * l
     # either the j was at the end, then backspace was sent, or jk was
     # in the middle, than app sees no backspace:
+    breakpoint()  # FIXME BREAKPOINT
     assert o['seen'].startswith(v1) or o['seen'].startswith(v2)
     assert o['seen'] == o['fifo'][0]
     t = o['tc_logged'][:-3]
